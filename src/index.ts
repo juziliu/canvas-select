@@ -53,7 +53,7 @@ export default class CanvasSelect extends EventBus {
     WIDTH = 0;
     /** 画布高度 */
     HEIGHT = 0;
-
+    
     canvas: HTMLCanvasElement;
 
     ctx: CanvasRenderingContext2D;
@@ -235,6 +235,7 @@ export default class CanvasSelect extends EventBus {
                     const nx = Math.round(offsetX - this.originX / this.scale);
                     const ny = Math.round(offsetY - this.originY / this.scale);
                     const curPoint: Point = [nx, ny];
+
                     switch (this.createType) {
                         case 1:
                             newShape = new Rect({ coor: [curPoint, curPoint] }, this.dataset.length);
@@ -612,11 +613,7 @@ export default class CanvasSelect extends EventBus {
      * @returns 布尔值
      */
     isInBackground(e: MouseEvent | TouchEvent): boolean {
-        const { mouseX, mouseY } = this.mergeEvent(e);
-        return mouseX >= this.originX &&
-            mouseY >= this.originY &&
-            mouseX <= this.originX + this.IMAGE_ORIGIN_WIDTH * this.scale &&
-            mouseY <= this.originY + this.IMAGE_ORIGIN_HEIGHT * this.scale;
+        return true;
     }
 
     /**

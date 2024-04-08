@@ -16,10 +16,8 @@
     } */
 
     .container {
-      background-color: #ccc;
-      width: 100%;
-      max-width: 400px;
-      height: 400px;
+      width: 100vw;
+      height: 50vh;
     }
 
     .right {
@@ -60,8 +58,9 @@
   <script>
     // alert(document.body.clientWidth)
     const output = document.getElementById('output');
-    const instance = new CanvasSelect('.container', 'https://n.sinaimg.cn/www/transform/300/w660h440/20240318/3875-37fb8533570d8661d3f547c7e3b0ddde.jpg');
-    instance.readonly = true
+    const instance = new CanvasSelect('.container');
+    instance.readonly = false
+    instance.allowShapeCross = false;
     // instance.focusMode = true
     instance.ctrlRadius = navigator.userAgent.includes('Mobile') ? 6 : 3
     window.c = instance;
