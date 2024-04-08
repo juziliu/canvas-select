@@ -53,7 +53,7 @@ export default class CanvasSelect extends EventBus {
     WIDTH = 0;
     /** 画布高度 */
     HEIGHT = 0;
-    
+
     canvas: HTMLCanvasElement;
 
     ctx: CanvasRenderingContext2D;
@@ -220,77 +220,79 @@ export default class CanvasSelect extends EventBus {
             if (this.ctrlIndex > -1 && !this.readonly) { // 点击到控制点
                 const [x0, y0] = ctrls[this.ctrlIndex];
                 this.remmber = [[offsetX - x0, offsetY - y0]];
-            } else if (this.isInBackground(e)) {
-                if (this.activeShape.creating && !this.readonly) { // 创建中
-                    if ([2, 4].includes(this.activeShape.type)) {
-                        const [x, y] = this.activeShape.coor[this.activeShape.coor.length - 1];
-                        if (x !== offsetX && y !== offsetY) {
-                            const nx = Math.round(offsetX - this.originX / this.scale);
-                            const ny = Math.round(offsetY - this.originY / this.scale);
-                            this.activeShape.coor.push([nx, ny]);
-                        }
-                    }
-                } else if (this.createType > 0 && !this.readonly) { // 开始创建
-                    let newShape;
-                    const nx = Math.round(offsetX - this.originX / this.scale);
-                    const ny = Math.round(offsetY - this.originY / this.scale);
-                    const curPoint: Point = [nx, ny];
+            } 
 
-                    switch (this.createType) {
-                        case 1:
-                            newShape = new Rect({ coor: [curPoint, curPoint] }, this.dataset.length);
-                            newShape.creating = true;
-                            break;
-                        case 2:
-                            newShape = new Polygon({ coor: [curPoint] }, this.dataset.length);
-                            newShape.creating = true;
-                            break;
-                        case 3:
-                            newShape = new Dot({ coor: curPoint }, this.dataset.length);
-                            this.emit('add', newShape);
-                            break;
-                        case 4:
-                            newShape = new Line({ coor: [curPoint] }, this.dataset.length);
-                            newShape.creating = true;
-                            break;
-                        case 5:
-                            newShape = new Circle({ coor: curPoint }, this.dataset.length);
-                            newShape.creating = true;
-                            break;
-                        default:
-                            break;
-                    }
-                    this.dataset.forEach((sp) => { sp.active = false; });
-                    newShape.active = true;
-                    this.dataset.push(newShape);
-                } else {
-                    // 是否点击到形状
-                    const [hitShapeIndex, hitShape] = this.hitOnShape(this.mouse);
-                    if (hitShapeIndex > -1) {
-                        hitShape.dragging = true;
-                        this.dataset.forEach((item, i) => item.active = i === hitShapeIndex);
-                        this.dataset.splice(hitShapeIndex, 1);
-                        this.dataset.push(hitShape);
-                        if (!this.readonly) {
-                            this.remmber = [];
-                            if ([3, 5].includes(hitShape.type)) {
-                                const [x, y] = hitShape.coor;
-                                this.remmber = [[offsetX - x, offsetY - y]];
-                            } else {
-                                hitShape.coor.forEach((pt: any) => {
-                                    this.remmber.push([offsetX - pt[0], offsetY - pt[1]]);
-                                });
-                            }
-                        }
-                        this.emit('select', hitShape);
-                    } else {
-                        this.activeShape.active = false;
-                        this.dataset.sort((a, b) => a.index - b.index);
-                        this.emit('select', null);
+            const [hitShapeIndex, hitShape] = this.hitOnShape(this.mouse);
+
+            if (this.activeShape.creating && !this.readonly) { // 创建中
+                if ([2, 4].includes(this.activeShape.type)) {
+                    const [x, y] = this.activeShape.coor[this.activeShape.coor.length - 1];
+                    if (x !== offsetX && y !== offsetY) {
+                        const nx = Math.round(offsetX - this.originX / this.scale);
+                        const ny = Math.round(offsetY - this.originY / this.scale);
+                        this.activeShape.coor.push([nx, ny]);
                     }
                 }
-                this.update();
-            }
+            } else if (hitShapeIndex !== -1) {
+                // 是否点击到形状
+                if (hitShapeIndex > -1) {
+                    hitShape.dragging = true;
+                    this.dataset.forEach((item, i) => item.active = i === hitShapeIndex);
+                    this.dataset.splice(hitShapeIndex, 1);
+                    this.dataset.push(hitShape);
+                    if (!this.readonly) {
+                        this.remmber = [];
+                        if ([3, 5].includes(hitShape.type)) {
+                            const [x, y] = hitShape.coor;
+                            this.remmber = [[offsetX - x, offsetY - y]];
+                        } else {
+                            hitShape.coor.forEach((pt: any) => {
+                                this.remmber.push([offsetX - pt[0], offsetY - pt[1]]);
+                            });
+                        }
+                    }
+                    this.emit('select', hitShape);
+                } else {
+                    this.activeShape.active = false;
+                    this.dataset.sort((a, b) => a.index - b.index);
+                    this.emit('select', null);
+                }
+            } else if (this.createType > 0 && !this.readonly) { // 开始创建
+                let newShape;
+                const nx = Math.round(offsetX - this.originX / this.scale);
+                const ny = Math.round(offsetY - this.originY / this.scale);
+                const curPoint: Point = [nx, ny];
+
+                switch (this.createType) {
+                    case 1:
+                        newShape = new Rect({ coor: [curPoint, curPoint] }, this.dataset.length);
+                        newShape.creating = true;
+                        break;
+                    case 2:
+                        newShape = new Polygon({ coor: [curPoint] }, this.dataset.length);
+                        newShape.creating = true;
+                        break;
+                    case 3:
+                        newShape = new Dot({ coor: curPoint }, this.dataset.length);
+                        this.emit('add', newShape);
+                        break;
+                    case 4:
+                        newShape = new Line({ coor: [curPoint] }, this.dataset.length);
+                        newShape.creating = true;
+                        break;
+                    case 5:
+                        newShape = new Circle({ coor: curPoint }, this.dataset.length);
+                        newShape.creating = true;
+                        break;
+                    default:
+                        break;
+                }
+                this.dataset.forEach((sp) => { sp.active = false; });
+                newShape.active = true;
+                this.dataset.push(newShape);
+            } 
+            this.update();
+        
         }
     }
 
